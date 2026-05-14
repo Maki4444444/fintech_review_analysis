@@ -1,1 +1,3 @@
-# fintech_review_analysis
+# Fintech Review Analytics
+
+Ethiopian bank app review analysis pipeline.
