@@ -3,3 +3,4 @@ pandas==2.2.2
 numpy==1.26.4
 tqdm==4.67.3
 pytest==9.0.3
+deep-translator==1.11.4
