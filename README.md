@@ -122,7 +122,36 @@ Reviews were scraped in **May 2026**. The date range of collected reviews depend
 
 ### Task 2: Sentiment & Thematic Analysis
 
-*Coming soon.*
+#### Sentiment Analysis
+
+Two models were used and compared:
+
+| Model | Type | Description |
+|-------|------|-------------|
+| VADER | Lexicon-based | Fast, rule-based, good for short informal text |
+| DistilBERT | Transformer | Context-aware, higher accuracy, fine-tuned on SST-2 |
+
+**Label thresholds (VADER):**
+- `compound >= 0.05` → positive
+- `compound <= -0.05` → negative
+- otherwise → neutral
+
+**Model Agreement Rate:** 68.89% overall (CBE: 72.5%, BOA: 62.5%, Dashen: 71.7%)
+
+#### Thematic Analysis
+
+Themes were identified per bank using TF-IDF and spaCy keyword extraction. Each bank has 7 distinct themes supported by keyword examples. Analysis was performed per bank to ensure themes reflect each bank's specific user feedback.
+
+#### Output
+
+| File | Description |
+|------|-------------|
+| `data/clean/reviews_sentiment.csv` | Reviews with VADER and DistilBERT scores |
+| `data/clean/reviews_final.csv` | Final dataset with sentiment and themes |
+| `data/clean/sentiment_by_bank.csv` | Aggregated sentiment per bank |
+| `data/clean/sentiment_by_rating.csv` | Aggregated sentiment per bank and star rating |
+
+> Note: All CSV files are listed in `.gitignore` and are not committed to GitHub.
 
 ---
 
