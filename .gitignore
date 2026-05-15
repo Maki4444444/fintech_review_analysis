@@ -18,8 +18,7 @@ data/
 *.ipynb_checkpoints
 
 # IDE
-.vscode/*
-!.vscode/settings.json
+.vscode/
 .idea/
 
 # OS
