@@ -22,12 +22,16 @@ fintech_review_analysis/
 │   └── clean/
 ├── notebooks/
 │   ├── init.py
-│   ├── data_collection.ipynb
-│   └── preprocessing.ipynb
+│   ├── Scraping.ipynb
+│   ├── preprocessing.ipynb
+│   ├── sentiment.ipynb
+│   └── thematic.ipynb
 ├── scripts/
 │   ├── init.py
 │   ├── scrape.py
-│   └── preprocess.py
+│   ├── preprocess.py
+│   ├── sentiment.py
+│   └── thematic.py
 ├── src/
 │   └── init.py
 └── tests/
