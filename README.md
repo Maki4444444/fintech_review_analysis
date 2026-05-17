@@ -26,12 +26,15 @@ fintech_review_analysis/
 │   ├── preprocessing.ipynb
 │   ├── sentiment.ipynb
 │   └── thematic.ipynb
+│   └── databse.ipynb
 ├── scripts/
 │   ├── init.py
 │   ├── scrape.py
 │   ├── preprocess.py
 │   ├── sentiment.py
 │   └── thematic.py
+│   └── db_insert.py
+│   └── db_queries.py
 ├── src/
 │   └── init.py
 └── tests/
@@ -161,7 +164,65 @@ Themes were identified per bank using TF-IDF and spaCy keyword extraction. Each 
 
 ### Task 3: Database Engineering
 
-*Coming soon.*
+#### Database Setup
+
+1. Install PostgreSQL and ensure it is running
+2. Run the following in psql to create the database and user:
+
+```sql
+CREATE DATABASE bank_reviews;
+CREATE USER bank_admin WITH PASSWORD 'admin123';
+GRANT ALL PRIVILEGES ON DATABASE bank_reviews TO bank_admin;
+\c bank_reviews
+GRANT CREATE ON SCHEMA public TO bank_admin;
+```
+
+3. Install psycopg2:
+
+```bash
+pip install psycopg2-binary
+```
+
+4. Run the insertion script:
+
+```bash
+python scripts/db_insert.py
+```
+
+5. Run verification queries:
+
+```bash
+python scripts/db_queries.py
+```
+
+#### Schema
+
+| Table | Columns |
+|-------|---------|
+| `banks` | `bank_id` (PK), `bank_name`, `app_id` |
+| `reviews` | `review_id` (PK), `bank_id` (FK), `review_text`, `rating`, `review_date`, `sentiment_label`, `sentiment_score`, `identified_theme`, `source` |
+
+The schema file is committed at `schema.sql`.
+
+#### Verification Query Results
+
+| Metric | CBE | BOA | Dashen |
+|--------|-----|-----|--------|
+| Total reviews | 600 | 600 | 600 |
+| Average rating | 4.12 | 3.51 | 3.93 |
+| Positive sentiment | 70.3% | 53.8% | 66.5% |
+| Negative sentiment | 29.7% | 46.2% | 33.5% |
+| Avg sentiment score | 0.4123 | 0.0862 | 0.3327 |
+| Null values | 0 | 0 | 0 |
+
+#### Output
+
+| File | Description |
+|------|-------------|
+| `schema.sql` | SQL schema file with table definitions and indexes |
+| `scripts/db_insert.py` | Connects to PostgreSQL and inserts all 1,800 reviews |
+| `scripts/db_queries.py` | Runs 7 verification queries and prints results |
+| `notebooks/database.ipynb` | Full database pipeline walkthrough with visualizations |
 
 ---
 
