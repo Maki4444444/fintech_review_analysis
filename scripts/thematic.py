@@ -6,6 +6,8 @@ Extracts keywords per bank using TF-IDF and spaCy, then maps
 reviews to business-relevant themes using a keyword-driven theme map
 built from the extracted keywords.
 
+Preprocessing is handled by scripts/nlp_pipeline.py.
+
 Usage:
     python scripts/thematic.py
 
@@ -17,25 +19,11 @@ Output:
 """
 
 import os
-import re
 import pandas as pd
-import spacy
-import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
-from collections import defaultdict
 
-nltk.download("stopwords", quiet=True)
-nltk.download("punkt", quiet=True)
-nltk.download("wordnet", quiet=True)
-
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-
-
-# Load spaCy model
-nlp = spacy.load("en_core_web_sm")
-STOP_WORDS = set(stopwords.words("english"))
-LEMMATIZER = WordNetLemmatizer()
+# Import modular NLP pipeline
+from scripts.nlp_pipeline import preprocess, spacy_noun_extract
 
 
 # ── Theme maps per bank ────────────────────────────────────────────────────────
@@ -67,12 +55,12 @@ CBE_THEME_MAP = {
         "complain", "call", "feedback", "contact", "resolve"
     ],
     "Positive Experience": [
-    "good", "great", "excellent", "best", "nice", "love",
-    "amazing", "awesome", "perfect", "wonderful", "happy",
-    "satisfied", "thank", "well", "superb", "fantastic",
-    "like", "useful", "helpful", "recommend", "impressive",
-    "convenient", "reliable", "works", "working", "ok",
-    "okay", "fine", "better", "improved", "smooth"
+        "good", "great", "excellent", "best", "nice", "love",
+        "amazing", "awesome", "perfect", "wonderful", "happy",
+        "satisfied", "thank", "well", "superb", "fantastic",
+        "like", "useful", "helpful", "recommend", "impressive",
+        "convenient", "reliable", "works", "working", "ok",
+        "okay", "fine", "better", "improved", "smooth"
     ],
     "Negative Experience": [
         "worst", "bad", "terrible", "horrible", "useless", "disappoint",
@@ -104,12 +92,12 @@ BOA_THEME_MAP = {
         "improve", "upgrade", "new", "wish", "missing", "developer"
     ],
     "Positive Experience": [
-    "good", "great", "excellent", "best", "nice", "love",
-    "amazing", "awesome", "perfect", "wonderful", "happy",
-    "satisfied", "thank", "well", "superb", "fantastic",
-    "like", "useful", "helpful", "recommend", "impressive",
-    "convenient", "reliable", "works", "working", "ok",
-    "okay", "fine", "better", "improved", "smooth"
+        "good", "great", "excellent", "best", "nice", "love",
+        "amazing", "awesome", "perfect", "wonderful", "happy",
+        "satisfied", "thank", "well", "superb", "fantastic",
+        "like", "useful", "helpful", "recommend", "impressive",
+        "convenient", "reliable", "works", "working", "ok",
+        "okay", "fine", "better", "improved", "smooth"
     ],
     "Negative Experience": [
         "worst", "bad", "terrible", "horrible", "useless", "disappoint",
@@ -140,52 +128,25 @@ DASHEN_THEME_MAP = {
         "support", "service", "help", "agent", "response",
         "complain", "call", "contact", "resolve", "feedback"
     ],
-     "Positive Experience": [
-    "good", "great", "excellent", "best", "nice", "love",
-    "amazing", "awesome", "perfect", "wonderful", "happy",
-    "satisfied", "thank", "well", "superb", "fantastic",
-    "like", "useful", "helpful", "recommend", "impressive",
-    "convenient", "reliable", "works", "working", "ok",
-    "okay", "fine", "better", "improved", "smooth"
-],
+    "Positive Experience": [
+        "good", "great", "excellent", "best", "nice", "love",
+        "amazing", "awesome", "perfect", "wonderful", "happy",
+        "satisfied", "thank", "well", "superb", "fantastic",
+        "like", "useful", "helpful", "recommend", "impressive",
+        "convenient", "reliable", "works", "working", "ok",
+        "okay", "fine", "better", "improved", "smooth"
+    ],
     "Negative Experience": [
         "worst", "bad", "terrible", "horrible", "useless", "disappoint",
         "poor", "hate", "awful", "waste", "pathetic"
     ],
 }
+
 BANK_THEME_MAPS = {
     "Commercial Bank of Ethiopia": CBE_THEME_MAP,
     "Bank of Abyssinia": BOA_THEME_MAP,
     "Dashen Bank": DASHEN_THEME_MAP,
 }
-
-
-# ── NLP preprocessing ─────────────────────────────────────────────────────────
-
-def preprocess_text(text: str) -> str:
-    """
-    Clean and normalize review text for keyword extraction.
-
-    Steps:
-        1. Lowercase
-        2. Remove non-alphabetic characters (keep spaces)
-        3. Tokenize and lemmatize
-        4. Remove stopwords and short tokens
-
-    Args:
-        text: Raw review string.
-
-    Returns:
-        Cleaned, lemmatized string.
-    """
-    text = re.sub(r"[^a-zA-Z\s]", " ", str(text).lower())
-    tokens = text.split()
-    tokens = [
-        LEMMATIZER.lemmatize(t)
-        for t in tokens
-        if t not in STOP_WORDS and len(t) > 2
-    ]
-    return " ".join(tokens)
 
 
 # ── TF-IDF keyword extraction ──────────────────────────────────────────────────
@@ -216,35 +177,6 @@ def extract_tfidf_keywords(texts: list, top_n: int = 30) -> list:
     return keyword_scores[:top_n]
 
 
-# ── spaCy keyword extraction ───────────────────────────────────────────────────
-
-def extract_spacy_keywords(texts: list, top_n: int = 30) -> list:
-    """
-    Extract top noun and noun-chunk keywords from texts using spaCy.
-
-    Args:
-        texts: List of raw review strings.
-        top_n: Number of top keywords to return.
-
-    Returns:
-        List of (keyword, count) tuples sorted by frequency descending.
-    """
-    freq = defaultdict(int)
-    combined = " ".join(texts[:500])  # limit for performance
-
-    doc = nlp(combined[:100000])  # spaCy has character limits
-
-    for token in doc:
-        if (
-            token.pos_ in ("NOUN", "PROPN")
-            and token.text.lower() not in STOP_WORDS
-            and len(token.text) > 2
-        ):
-            freq[token.lemma_.lower()] += 1
-
-    return sorted(freq.items(), key=lambda x: x[1], reverse=True)[:top_n]
-
-
 # ── Theme assignment ───────────────────────────────────────────────────────────
 
 def assign_theme(review: str, theme_map: dict) -> str:
@@ -273,9 +205,10 @@ def run_thematic_analysis(df: pd.DataFrame) -> pd.DataFrame:
     Run full thematic analysis pipeline per bank.
 
     For each bank:
-        1. Preprocesses review text
-        2. Extracts TF-IDF and spaCy keywords
-        3. Assigns themes using the bank-specific theme map
+        1. Preprocesses review text using nlp_pipeline.preprocess()
+        2. Extracts TF-IDF keywords
+        3. Extracts spaCy noun keywords via nlp_pipeline.spacy_noun_extract()
+        4. Assigns themes using the bank-specific theme map
 
     Args:
         df: DataFrame with 'review' and 'bank' columns.
@@ -283,7 +216,7 @@ def run_thematic_analysis(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with added 'clean_text' and 'identified_theme' columns.
     """
-    df["clean_text"] = df["review"].apply(preprocess_text)
+    df["clean_text"] = df["review"].apply(preprocess)
     df["identified_theme"] = "Other"
 
     for bank_name, theme_map in BANK_THEME_MAPS.items():
@@ -302,8 +235,8 @@ def run_thematic_analysis(df: pd.DataFrame) -> pd.DataFrame:
         for kw, score in tfidf_keywords[:15]:
             print(f"  {kw:<30} {score:.4f}")
 
-        # spaCy keywords
-        spacy_keywords = extract_spacy_keywords(
+        # spaCy keywords via nlp_pipeline
+        spacy_keywords = spacy_noun_extract(
             bank_df["review"].tolist(), top_n=30
         )
         print(f"\n[spaCy] Top noun keywords:")
@@ -328,7 +261,6 @@ if __name__ == "__main__":
 
     df = run_thematic_analysis(df)
 
-    # Select final output columns
     final_cols = [
         "review", "rating", "date", "bank", "source",
         "vader_score", "vader_label",

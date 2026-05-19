@@ -35,10 +35,11 @@ fintech_review_analysis/
 │   └── thematic.py
 │   └── db_insert.py
 │   └── db_queries.py
+│   └── nlp_pipeline.py
 ├── src/
 │   └── init.py
 └── tests/
-└── init.py
+│   └── init.py
 
 ---
 
