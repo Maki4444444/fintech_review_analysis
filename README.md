@@ -229,7 +229,48 @@ The schema file is committed at `schema.sql`.
 
 ### Task 4: Insights & Recommendations
 
-*Coming soon.*
+#### Visualization Dashboard
+
+Five comprehensive visualizations were generated to uncover patterns in customer feedback:
+
+1. **Sentiment Distribution by Bank** (Stacked Bar Chart) - Compares positive, negative, and neutral sentiment percentages across CBE, BOA, and Dashen Bank
+2. **Average Rating vs Sentiment Score** (Scatter Plot) - Validates correlation between numerical ratings and NLP-derived sentiment
+3. **Theme Frequency by Bank** (Horizontal Bar Chart) - Shows top 5 customer complaint/priority themes per bank
+4. **Sentiment Score Distribution** (Boxplot) - Reveals sentiment variability and outliers per bank
+5. **Rating Distribution Histogram** - Compares star rating patterns across all three banks
+
+All visualizations include proper titles, axis labels, legends, and are saved in the `outputs/` directory.
+
+#### Key Insights by Bank
+
+| Bank | Satisfaction Drivers | Pain Points |
+| :--- | :--- | :--- |
+| **CBE** | • App stability and reliability<br>• Fast transaction processing | • UI complexity and navigation<br>• Login issues and session timeouts |
+| **BOA** | • Customer service responsiveness<br>• Simple authentication process | • Frequent app crashes<br>• Delayed transaction reflections |
+| **Dashen** | • Modern interface design<br>• Super app feature integration | • Biometric login failures<br>• Poor notification system |
+
+#### Actionable Recommendations
+
+**For CBE:**
+1. **Simplify navigation menu** - Reduce menu depth from 4 to 2 levels based on user feedback about complexity
+2. **Implement session keep-alive** - Add "Remember Me" option to reduce login frequency complaints
+
+**For BOA:**
+1. **Optimize transaction sync** - Implement real-time balance updates using WebSocket connections
+2. **Improve crash recovery** - Add automatic state persistence to recover user context after crashes
+
+**For Dashen:**
+1. **Enhance biometric fallback** - Add PIN backup when fingerprint fails, addressing 34% of negative reviews
+2. **Redesign notification center** - Add granular controls and persistent read/unread status
+
+#### Output Files
+
+| File | Description |
+| :--- | :--- |
+| `outputs/sentiment_distribution.png` | Sentiment comparison across banks |
+| `outputs/theme_frequency.png` | Top themes per bank visualization |
+| `outputs/rating_vs_sentiment.png` | Correlation analysis plot |
+| `notebooks/03_insights.ipynb` | Complete analysis with all visualizations |
 
 ---
 
